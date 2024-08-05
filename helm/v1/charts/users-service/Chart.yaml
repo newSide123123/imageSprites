@@ -1,0 +1,11 @@
+﻿apiVersion: v2
+type: application
+version: 1.0.0
+name: users-service
+appVersion: "1.1"
+description: "Users Service"
+dependencies:
+  - name: common
+    version: 1.0.0
+    repository: file://../common
+  
