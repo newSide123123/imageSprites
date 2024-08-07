@@ -1,0 +1,42 @@
+﻿replicaCount: 2
+
+selector: "store-service"
+
+container:
+  name: "store-service"
+  image: "idiordiev/online-shop-store-service"
+
+service:
+  ports:
+    - name: http
+      port: 80
+      containerPort: 80
+
+migrations:
+  container:
+    name: "run-migrations"
+    image: "idiordiev/online-shop-store-service-migrations"
+    tag: "latest"
+    
+ingress:
+  path: "/api/store"
+  port: "http"
+
+postgresql:
+  auth:
+    database: "store"
+
+rabbitmq:
+  options:
+    - name: "EntityExchange"
+      value: "entity"
+    - name: "EntityCreateQueue"
+      value: "entity.create"
+    - name: "EntityUpdateQueue"
+      value: "entity.update"
+    - name: "EntityDeleteQueue"
+      value: "entity.delete"
+    - name: "EmailExchange"
+      value: "email"
+    - name: "EmailSendQueue"
+      value: "email.send"
