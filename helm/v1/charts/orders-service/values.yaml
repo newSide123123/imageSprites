@@ -1,0 +1,42 @@
+﻿replicaCount: 1
+
+selector: "orders-service"
+
+container:
+  name: "orders-service"
+  image: "idiordiev/online-shop-orders-service"
+
+service:
+  ports:
+    - name: http
+      port: 80
+      containerPort: 80
+
+migrations:
+  container:
+    name: "run-migrations"
+    image: "idiordiev/online-shop-orders-service-migrations"
+    tag: "latest"
+    
+ingress:
+  path: "/api/orders"
+  port: "http"
+
+postgresql:
+  auth:
+    database: "orders"
+
+rabbitmq:
+  options:
+    - name: "EntityExchange"
+      value: "entity"
+    - name: "EntityCreateQueue"
+      value: "entity.create"
+    - name: "EntityUpdateQueue"
+      value: "entity.update"
+    - name: "EntityDeleteQueue"
+      value: "entity.delete"
+    - name: "EmailExchange"
+      value: "email"
+    - name: "EmailSendQueue"
+      value: "email.send" 
