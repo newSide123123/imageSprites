@@ -1,0 +1,28 @@
+﻿replicaCount: 1
+
+selector: "entity-history"
+
+container:
+  name: "entity-history"
+  image: "idiordiev/online-shop-entity-history"
+
+migrations:
+  container:
+    name: "run-migrations"
+    image: "idiordiev/online-shop-entity-history-migrations"
+    tag: "latest"
+
+postgresql:
+  auth:
+    database: "entityHistory"
+
+rabbitmq:
+  options:
+    - name: "EntityExchange"
+      value: "entity"
+    - name: "EntityCreateQueue"
+      value: "entity.create"
+    - name: "EntityUpdateQueue"
+      value: "entity.update"
+    - name: "EntityDeleteQueue"
+      value: "entity.delete"
