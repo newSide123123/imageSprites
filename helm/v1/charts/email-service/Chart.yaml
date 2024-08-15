@@ -1,0 +1,10 @@
+﻿apiVersion: v2
+type: application
+version: 1.0.0
+name: email-service
+appVersion: "1.0"
+description: "Email Service"
+dependencies:
+  - name: common
+    version: 1.0.0
+    repository: file://../common
