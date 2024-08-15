@@ -1,0 +1,14 @@
+﻿replicaCount: 1
+
+selector: "email-service"
+
+container:
+  name: "email-service"
+  image: "idiordiev/online-shop-email-service"
+
+rabbitmq:
+  options:
+    - name: "EmailExchange"
+      value: "email"
+    - name: "EmailSendQueue"
+      value: "email.send"
