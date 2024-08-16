@@ -1,0 +1,58 @@
+﻿{{- define "common.service" -}}
+
+{{- $common := dict "Values" .Values.common -}}
+{{- $noCommon := omit .Values "common" -}}
+{{- $overrides := dict "Values" $noCommon -}}
+{{- $noValues := omit . "Values" -}}
+{{- with merge $noValues $overrides $common -}}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "common.fullname" . }}
+spec:
+  type: ClusterIP
+  ports:
+      {{- range  .Values.service.ports }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      targetPort: {{ .containerPort }}
+      {{- end }}
+  selector:
+    app: {{ .Values.selector }}
+    
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "common.fullname" . }}
+spec:
+  hosts:
+    - {{ include "common.fullname" . }}
+  http:
+    - route:
+        - destination:
+            host: {{ include "common.fullname" . }}
+      timeout: 10s
+      retries:
+        attempts: 2
+        retryOn: 5xx
+        perTryTimeout: 10s
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: {{ include "common.fullname" . }}
+spec:
+  host: {{ include "common.fullname" . }}
+  trafficPolicy:
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 1m
+      baseEjectionTime: 1m
+      maxEjectionPercent: 50
+
+{{- end -}}
+{{- end -}}
