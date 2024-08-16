@@ -1,0 +1,29 @@
+﻿{{- define "common.ingress" -}}
+
+{{- $common := dict "Values" .Values.common -}}
+{{- $noCommon := omit .Values "common" -}}
+{{- $overrides := dict "Values" $noCommon -}}
+{{- $noValues := omit . "Values" -}}
+{{- with merge $noValues $overrides $common -}}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "common.fullname" . }}
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: {{ .Values.ingress.path }}
+            pathType: "Prefix"
+            backend:
+              service:
+                name: {{ include "common.fullname" . }}
+                port:
+                  name: {{ .Values.ingress.port }}
+
+{{- end -}}
+{{- end -}}
