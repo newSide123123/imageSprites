@@ -1,0 +1,81 @@
+﻿{{- define "common.deployment" -}}
+
+{{- $common := dict "Values" .Values.common -}}
+{{- $noCommon := omit .Values "common" -}}
+{{- $overrides := dict "Values" $noCommon -}}
+{{- $noValues := omit . "Values" -}}
+{{- with merge $noValues $overrides $common -}}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "common.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      app: {{ .Values.selector | toYaml }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.selector | toYaml }}
+    spec:
+      {{- if .Values.migrations }}
+      initContainers:
+        - name: {{ .Values.migrations.container.name }}
+          image: {{ .Values.migrations.container.image }}:{{ .Values.migrations.container.tag | default "latest" }}
+          env:
+              {{- if .Values.postgresql }}
+                - name: ConnectionStrings__PostgresConnection
+                value: "Host={{ .Release.Name }}-{{ .Values.global.postgresName }};Port={{ .Values.global.postgresql.service.ports.postgresql }};Database={{ .Values.postgresql.auth.database }};Username={{ .Values.global.postgresql.auth.username }};Password={{ .Values.global.postgresql.auth.password }}"
+            {{ - end }}
+            {{ - if .Values.global.services }}
+                - name: ServiceUrls__BasketsService
+                  value: "http://{{ .Release.Name }}-{{ .Values.global.services.basketsService }}/api/baskets"
+                - name: ServiceUrls__OrdersService
+                  value: "http://{{ .Release.Name }}-{{ .Values.global.services.ordersService }}/api/orders"
+                - name: ServiceUrls__StoreService
+                  value: "http://{{ .Release.Name }}-{{ .Values.global.services.storeService }}/api/store"
+                - name: ServiceUrls__UsersService
+                  value: "http://{{ .Release.Name }}-{{ .Values.global.services.usersService }}/api/users"
+            {{ - end }}
+      {{- end }}
+      containers:
+        - image: {{ .Values.container.image }}
+          imagePullPolicy: Always
+          name: {{ .Values.container.name }}
+          ports:
+            {{- range .Values.service.ports }}
+            - name: {{ .name }}
+              containerPort: {{ .containerPort }}
+            {{- end }}
+          env:
+            {{ - if .Values.postgresql }}
+            - name: ConnectionStrings__PostgresConnection
+              value: "Host={{ .Release.Name }}-{{ .Values.global.postgresName }};Port={{ .Values.global.postgresql.service.ports.postgresql }};Database={{ .Values.postgresql.auth.database }};Username={{ .Values.global.postgresql.auth.username }};Password={{ .Values.global.postgresql.auth.password }}"
+            {{ - end }}
+            {{ - if .Values.global.services }}
+            - name: ServiceUrls__BasketsService
+              value: "http://{{ .Release.Name }}-{{ .Values.global.services.basketsService }}/api/baskets"
+            - name: ServiceUrls__OrdersService
+              value: "http://{{ .Release.Name }}-{{ .Values.global.services.ordersService }}/api/orders"
+            - name: ServiceUrls__StoreService
+              value: "http://{{ .Release.Name }}-{{ .Values.global.services.storeService }}/api/store"
+            - name: ServiceUrls__UsersService
+              value: "http://{{ .Release.Name }}-{{ .Values.global.services.usersService }}/api/users"
+            {{ - end }}
+            {{ - if .Values.rabbitmq }}
+            - name: RabbitMQ__Host
+              value: "{{ .Values.global.rabbitmq.host }}"
+            - name: RabbitMQ__Username
+              value: { { .Values.global.rabbitmq.username } }
+            - name: RabbitMQ__Password
+              value: { { .Values.global.rabbitmq.password } }
+            {{ - range .Values.rabbitmq.options } }
+            - name: "RabbitMQ__{{ .name }}"
+              value: { { .value } }
+            {{ - end }}
+            {{ - end }}
+{{- end -}}
+{{- end -}}
