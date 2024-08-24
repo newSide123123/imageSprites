@@ -1,0 +1,10 @@
+﻿apiVersion: v2
+type: application
+version: 1.0.0
+name: online-shop
+appVersion: "1.1"
+description: "Online Shop"
+dependencies:
+  - name: postgresql
+    version: 12.2.8
+    repository: https://charts.bitnami.com/bitnami
