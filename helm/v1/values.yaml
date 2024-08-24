@@ -1,0 +1,27 @@
+﻿global:
+  services:
+    basketsService: "baskets-service"
+    ordersService: "orders-service"
+    storeService: "store-service"
+    usersService: "users-service"
+  rabbitmq:
+    host: "rabbitmq"
+    port: 5672
+    username: "test"
+    password: "test_pass"
+  postgresName: "postgres"
+  postgresql: 
+    service: 
+      ports: 
+        postgresql: 5432
+    auth:
+      postgresPassword: "DVypULxSCuElHPOUEobD"
+      username: "onlineshop"
+      password: "yhivJp9hroOoY70pASHC"
+
+postgresql:
+  nameOverride: "postgres"
+  primary:
+    persistence:
+      size: 5Gi
+      mountPath: "/var/lib/postgresql/data/"
